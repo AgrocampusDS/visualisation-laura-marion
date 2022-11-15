@@ -101,18 +101,25 @@ all_obesity_country = filter(obesitycountries2, Sex=="Both sexes")
 
 # voir pour rajouter les pays enlevés 
 
+all_obesity_country=all_obesity_country[!is.na(all_obesity_country$pop_est),]
+all_obesity_country=all_obesity_country[!is.na(all_obesity_country$continent),]
+
 obesity_by_region = all_obesity_country %>% 
   group_by(continent, Year) %>% 
-  summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity)) 
+  summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity),
+            weighted_mean = weighted.mean(x=Obesity,w=pop_est))
+              
 
-p2 = ggplot(obesity_by_region, aes(Year,AvgObesity* TotalPopulation,color=continent)) +
+p2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
   ggtitle("Obesity evolution from 1975 to 2016 by continent") +
-  geom_line(aes(linetype=continent, group=continent))+
+  geom_line(aes(linetype=continent, group=continent), linetype="solid", size=1.5)+
   scale_x_discrete(breaks = seq(1975, 2016, 10)) +
-  xlab('Dates') +
+  scale_colour_discrete(name  ="Continent",
+                        breaks=c("North America", "Oceania", "Europe", "South America", "Africa", "Asia"))+
+  xlab('Year') +
   ylab('Obesity %') +
-  theme_minimal() + 
-  scale_color_brewer(palette = "Dark2")
+  theme_minimal() 
+  #scale_color_brewer(palette = "Dark2")
 
 p2
 
