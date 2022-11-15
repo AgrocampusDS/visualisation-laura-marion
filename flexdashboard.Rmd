@@ -5,12 +5,17 @@ output:
   flexdashboard::flex_dashboard:
     theme:
       version: 4
+<<<<<<< HEAD
       bg: "#FFFFFF" # couleur fond
       fg: "#292828"  # couleur texte
       primary: "#12BDBB" # couleur barre en haut
       base_font: 
         google: Prompt
     orientation: rows
+=======
+      bootswatch: minty
+    orientation: columns
+>>>>>>> Transformation du dasboard en colonne
     vertical_layout: fill
     navbar:
       - { title: "Data", href: "https://www.kaggle.com/datasets/amanarora/obesity-among-adults-by-country-19752016", align: left }
@@ -129,19 +134,24 @@ all_obesity_country = filter(obesitycountries2, Sex=="Both sexes")
 
 # voir pour rajouter les pays enlevés 
 
+all_obesity_country=all_obesity_country[!is.na(all_obesity_country$pop_est),]
+all_obesity_country=all_obesity_country[!is.na(all_obesity_country$continent),]
+
 obesity_by_region = all_obesity_country %>% 
   group_by(continent, Year) %>% 
-  summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity)) 
+  summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity),
+            weighted_mean = weighted.mean(x=Obesity,w=pop_est))
+              
 
-plot2 = ggplot(obesity_by_region, aes(Year,AvgObesity* TotalPopulation,color=continent)) +
+plot2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
   ggtitle("Obesity evolution from 1975 to 2016 by continent") +
-  geom_line(aes(linetype=continent, group=continent))+
+  geom_line(aes(linetype=continent, group=continent), linetype="solid", size=1.5)+
   scale_x_discrete(breaks = seq(1975, 2016, 10)) +
-  xlab('Dates') +
+  scale_colour_discrete(name  ="Continent",
+                        breaks=c("North America", "Oceania", "Europe", "South America", "Africa", "Asia"))+
+  xlab('Year') +
   ylab('Obesity %') +
-  theme_minimal() + 
-  scale_color_brewer(palette = "Dark2")
-#plot2
+  theme_minimal() 
 ```
 
 
@@ -201,7 +211,7 @@ carte2 <- obesity_2016_world %>%
 Preview {data-icon="fa fa-home fa-fw"}
 ===================================== 
 
-Row {data-height=400}
+Column {data-width=400}
 -------------------------------------
     
 ### Global evolution
@@ -217,15 +227,21 @@ plot(plot1)
 plot(plot2)
 ```
     
-Row {data-height=600}
+Column {data-width=600}
 -------------------------------------
     
 ### Map 
 
+<<<<<<< HEAD
 ```{r preview carte1, fig.align="center",fig.height=18, fig.width=24}
 # plot(carte1)
 # plot(carte2)
 grid.arrange(carte1,carte2,nrow=1)
+=======
+```{r preview carte1 et carte2}
+#,fig.width=15, fig.height=12
+grid.arrange(carte1, carte2, nrow = 2, ncol=1)
+>>>>>>> Transformation du dasboard en colonne
 ```
 
 
@@ -252,9 +268,14 @@ Maps {data-icon="fa-globe"}
 
 ### Map 
 
+<<<<<<< HEAD
 ```{r carte2, fig.align="center"}
 plot(carte1)
 plot(carte2)
+=======
+```{r carte1 et carte2}
+grid.arrange(carte1, carte2, nrow = 2) #top = "Maps of the evolution of obesity"
+>>>>>>> Transformation du dasboard en colonne
 ```
 
 
