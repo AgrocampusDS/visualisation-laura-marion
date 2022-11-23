@@ -55,6 +55,7 @@ library(lubridate)        # dealing with data easier
 library(RColorBrewer)     # color palette
 library(viridis)          # color for daltonian
 library(tmap)             # package for maping
+library(grid)             # adds an nx by ny rectangular grid 
 library("gridExtra")      # package pour fusionner des graphes
 library("cowplot")        # package pour fusionner des graphes
 library("flexdashboard")  # create a flexdashboard
@@ -136,13 +137,16 @@ plot1 = ggplot(w_all_year,
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_gradientn(colors = rev(col_strip))+
   guides(fill = guide_colorbar(barwidth = 1))+
-  labs(title = "Obesity 1975-2016",
-       caption = "Data : Adult obesity, population-weighted by country, between 1975-2016.",
+  labs(title = "Worldwide evolution of obesity : 1975-2016",
+       caption = "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016",
        fill="Obesity %")+
   theme_strip
 ```
 
 ```{r graph2, include = FALSE}
+# courbe d'évolution de l'obésite par continent 
+
+# 1 avec dataset World et région non continents
 # courbe d'évolution de l'obésite par continent 
 
 # 1 avec dataset World et région non continents
@@ -157,18 +161,41 @@ obesity_by_region = all_obesity_country %>%
   group_by(continent, Year) %>% 
   summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity),
             weighted_mean = weighted.mean(x=Obesity,w=pop_est))
-              
 
-plot2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
-  ggtitle("Obesity evolution from 1975 to 2016 by continent") +
+testttt <- all_obesity_country %>%
+  left_join(obesity_by_region)
+
+testtttbis <- testttt %>% group_by(continent, Year) %>%
+  summarise(
+    Max = max(Obesity),
+    Min = min(Obesity)
+  ) 
+
+dataset_vf2 <- left_join(testttt, testtttbis, by= c("continent", "Year"))
+
+theme_cont <- theme_minimal()+
+  theme(#axis.title = element_blank(),
+    panel.grid.major = element_blank(),
+    #axis.text.x = element_text(vjust = 3),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(size = 14, hjust=0.5, face = "bold"),
+    plot.caption = element_text(face = "italic", hjust=0.5))
+
+plot2 <- ggplot(dataset_vf2, aes(Year, weighted_mean, color=continent)) +
+  geom_point(aes(Year,Min, shape="15"))+
+  geom_point(aes(Year, Max, shape="17"))+
   geom_line(aes(linetype=continent, group=continent), linetype="solid", size=1.5)+
   scale_x_discrete(breaks = seq(1975, 2016, 10)) +
   scale_colour_discrete(name  ="Continent",
                         breaks=c("North America", "Oceania", "Europe", "South America", "Africa", "Asia"))+
+  scale_shape_discrete(name="Extreme values for each continent", breaks=c("17", "15"), labels=c("Maximum", "Minimum"))+
   xlab('Year') +
   ylab('Obesity %') +
-  theme_minimal() 
-  #scale_color_brewer(palette = "Dark2")
+  labs(
+    title = "Evolution of obesity from 1975 to 2016 by continent",
+    caption = "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016") +
+  theme_cont
+
 
 #plot2
 ```
@@ -183,7 +210,10 @@ plot2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
 obesity_1975 = filter(obesitycountries2, Year=="1975")
 obesity_1975 = filter(obesity_1975, Sex=="Both sexes")
 obesity_1975 = filter(obesity_1975, CountryISO!="ATA")
+obesity_1975 = filter(obesity_1975, CountryISO!="GRL")
+World=filter(World, CountryISO!="GRL")
 World=filter(World, CountryISO!="ATA")
+
 
 # on fusionne les données du monde et notre dataset sur l'obésité en 2016 (grace à CountryISO)
 obesity_1975_world <- World %>%
@@ -194,12 +224,11 @@ carte1 <- obesity_1975_world %>%
   ggplot() + 
   geom_sf(aes(fill = Obesity),color="white",size=.2)+
   theme_void()+
-  theme(panel.background = element_rect(fill = "white"))+
+  theme(panel.background = element_rect(fill = "#E2F4FF"))+
   scale_fill_gradientn(colors = rev(col_strip), limits = c(0, 40),
                        breaks=c(10, 20, 30))+
   guides(fill = guide_colorbar(barwidth = 1))+
-  labs(title = "Obesity rates by country in 1975",
-       caption = "Data : Adult obesity by country in 1975.",
+  labs(title = "1975",
        fill="Obesity %")
 #carte1
 ```
@@ -209,7 +238,8 @@ carte1 <- obesity_1975_world %>%
 # création d'un fichier avec taux d'obésité par pays en 2016
 obesity_2016 = filter(obesitycountries2, Year=="2016")
 obesity_2016 = filter(obesity_2016, Sex=="Both sexes")
-obesity_1975 = filter(obesity_1975, CountryISO!="ATA")
+obesity_2016 = filter(obesity_2016, CountryISO!="ATA")
+obesity_2016 = filter(obesity_2016, CountryISO!="GRL")
 World=filter(World, CountryISO!="ATA")
 
 # on fusionne les données du monde et notre dataset sur l'obésité en 2016 (grace à CountryISO)
@@ -221,12 +251,11 @@ carte2 <- obesity_2016_world %>%
   ggplot() + 
   geom_sf(aes(fill = Obesity),color="white",size=.2)+
   theme_void()+
-  theme(panel.background = element_rect(fill = "white"))+
+  theme(panel.background = element_rect(fill = "#E2F4FF"))+
   scale_fill_gradientn(colors = rev(col_strip),limits = c(0, 40),
                        breaks=c(10, 20, 30))+
   guides(fill = guide_colorbar(barwidth = 1))+
-  labs(title = "Obesity rates by country in 2016",
-       caption = "Data : Adult obesity by country in 2016.",
+  labs(title = "2016",
        fill="Obesity %")
 #carte2
 ```
@@ -235,23 +264,23 @@ carte2 <- obesity_2016_world %>%
 Preview {data-icon="fas fa-home"}
 ===================================== 
 
-Column {data-width=400}
+Column {data-width=500}
 -------------------------------------
     
 ### Worldwide evolution of obesity
 
-```{r preview graph 1}
+```{r preview graph 1, fig.width=12}
 # affichage du 1er graph
 plot(plot1)
 ```
    
 ### Evolution of obesity by continents
 
-```{r preview graph 2}
+```{r preview graph 2, fig.width=12}
 plot(plot2)
 ```
     
-Column {data-width=600}
+Column {data-width=500}
 -------------------------------------
     
 ### Evolution of obesity by country
@@ -259,7 +288,13 @@ Column {data-width=600}
 
 ```{r preview carte1 et carte2}
 #,fig.width=15, fig.height=12
-grid.arrange(carte1, carte2, nrow = 2, ncol=1)
+grid.arrange(carte1, carte2, nrow = 2,  
+             top =textGrob("Evolution of obesity rates  by country", gp=gpar(fontface="bold")),
+  bottom = textGrob(
+    "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016",
+    gp = gpar(fontface = 3, fontsize = 9),
+    hjust = 0.5,
+    x = 1)) 
 ```
 
 Explanations {data-icon="fas fa-wrench"}
@@ -311,7 +346,7 @@ Worldwide evolution {data-icon="fa-signal"}
 
 ### Global evolution
     
-```{r graph 1}
+```{r graph 1, fig.width=12}
 # Affichage de la carte dans une page unique
 plot(plot1)
 ```
@@ -320,8 +355,8 @@ Evolution by continent  {data-icon="fa-signal"}
 =====================================      
 ### Obesity trends by continent
 
-```{r graph 2}
-plot(plot2)
+```{r graph 2, fig.width=12}
+plot2
 ```
 
 Evolution by country {data-icon="fa-globe"}
@@ -330,7 +365,14 @@ Evolution by country {data-icon="fa-globe"}
 ### Evolution by country 
 
 ```{r carte1 et carte2}
-grid.arrange(carte1, carte2, nrow = 2) #top = "Maps of the evolution of obesity"
+grid.arrange(carte1, carte2, nrow = 2,  
+             top =textGrob("Evolution of obesity rates  by country", gp=gpar(fontface="bold")),
+  bottom = textGrob(
+    "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016",
+    gp = gpar(fontface = 3, fontsize = 9),
+    hjust = 0.5,
+    x = 1)) 
+#top = "Maps of the evolution of obesity"
 ```
 
 

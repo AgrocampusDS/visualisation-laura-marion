@@ -73,6 +73,8 @@ theme_strip <- theme_minimal()+
         axis.title = element_blank(),
         panel.grid.major = element_blank(),
         #legend.title = element_blank(),
+        legend.position="top",
+        legend.box = "horizontal",
         axis.text.x = element_text(vjust = 3),
         panel.grid.minor = element_blank(),
         plot.title = element_text(size = 14, hjust=0.5, face = "bold"),
@@ -112,13 +114,44 @@ obesity_by_region = all_obesity_country %>%
   group_by(continent, Year) %>% 
   summarise(TotalPopulation = sum(pop_est), AvgObesity = mean(Obesity),
             weighted_mean = weighted.mean(x=Obesity,w=pop_est))
-<<<<<<< HEAD
-              
 
-=======
+testttt <- all_obesity_country %>%
+  left_join(obesity_by_region)
+
+testtttbis <- testttt %>% group_by(continent, Year) %>%
+  summarise(
+    Max = max(Obesity),
+    Min = min(Obesity)
+  ) 
+
+dataset_vf2 <- left_join(testttt, testtttbis, by= c("continent", "Year"))
+
+theme_cont <- theme_minimal()+
+  theme(#axis.title = element_blank(),
+    panel.grid.major = element_blank(),
+    #axis.text.x = element_text(vjust = 3),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(size = 14, hjust=0.5, face = "bold"),
+    plot.caption = element_text(face = "italic", hjust=0.5))
+
+p <- ggplot(dataset_vf2, aes(Year, weighted_mean, color=continent)) +
+  geom_point(aes(Year,Min, shape="15"))+
+  geom_point(aes(Year, Max, shape="17"))+
+  geom_line(aes(linetype=continent, group=continent), linetype="solid", size=1.5)+
+  scale_x_discrete(breaks = seq(1975, 2016, 10)) +
+  scale_colour_discrete(name  ="Continent",
+                        breaks=c("North America", "Oceania", "Europe", "South America", "Africa", "Asia"))+
+  scale_shape_discrete(name="Extreme values for each continent", breaks=c("17", "15"), labels=c("Maximum", "Minimum"))+
+  xlab('Year') +
+  ylab('Obesity %') +
+  labs(
+    title = "Evolution of obesity from 1975 to 2016 by continent",
+    caption = "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016") +
+  theme_cont
+p
 
 
->>>>>>> mise en page, modif légendes, titres etc...
+
 p2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
   ggtitle("Obesity evolution from 1975 to 2016 by continent") +
   geom_line(aes(linetype=continent, group=continent), linetype="solid", size=1.5)+
@@ -128,13 +161,13 @@ p2 = ggplot(obesity_by_region, aes(Year,weighted_mean,color=continent)) +
   xlab('Year') +
   ylab('Obesity %') +
   theme_minimal() 
-<<<<<<< HEAD
+
   #scale_color_brewer(palette = "Dark2")
 
 p2
-=======
+
 #scale_color_brewer(palette = "Dark2")
->>>>>>> mise en page, modif légendes, titres etc...
+
 
 
 # --------------------------------------------------------------------------------
@@ -197,9 +230,9 @@ map_sdg_indicators2
 
 plot_grid(map_sdg_indicators1, map_sdg_indicators2, labels=c("1975", "2016"), ncol = 2, nrow = 1)
 
-<<<<<<< HEAD
+
 grid.arrange(map_sdg_indicators1,map_sdg_indicators2,nrow=1)
 
-=======
+
 grid.arrange(map_sdg_indicators1, map_sdg_indicators2, ncol=2, nrow=1)
->>>>>>> Transformation du dasboard en colonne
+
