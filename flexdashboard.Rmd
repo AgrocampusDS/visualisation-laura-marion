@@ -293,7 +293,7 @@ grid.arrange(carte1, carte2, nrow = 2,
   bottom = textGrob(
     "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016",
     gp = gpar(fontface = 3, fontsize = 9),
-    hjust = 0.5,
+    hjust = 1.2,
     x = 1)) 
 ```
 
@@ -302,9 +302,9 @@ Explanations {data-icon="fas fa-wrench"}
 
 ### Explanation of the data set
 
-We use a dataset from _Kaggle_ to study obesity over time. 
+We use a dataset from _Kaggle_ to study obesity over time, data are collected by WHO. 
 
-According to the WHO, a person is overweight when his or her body mass index (BMI) is above 25 and obese when it is above 30. The problem has reached epidemic proportions as of 2017, more than 4 million people were dying each year from overweight or obesity, according to a Global Burden of Disease study.
+According to the WHO, a person is overweight when his or her body mass index (BMI) is above 25 and obese when it is above 30. 
 
 <br/>
 
@@ -370,7 +370,7 @@ grid.arrange(carte1, carte2, nrow = 2,
   bottom = textGrob(
     "Data : Obesity among adults dataset by WHO, from year 1975 to year 2016",
     gp = gpar(fontface = 3, fontsize = 9),
-    hjust = 0.5,
+    hjust = 1.2,
     x = 1)) 
 #top = "Maps of the evolution of obesity"
 ```
